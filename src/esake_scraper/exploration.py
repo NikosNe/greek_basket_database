@@ -10,7 +10,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 URL = "http://www.esake.gr/el/action/EsakeResults?idchampionship=0000000D&idteam=&idseason=00000001&series=01"
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/46.0.2490.80 Safari/537.36",
+    "Chrome/46.0.2490.80 Safari/537.36",
     "Content-Type": "text/html",
 }
 
@@ -32,15 +32,16 @@ test = id_soup.find_all()
 # We are using webdriver, otherwise we can't parse the html
 import time
 from selenium import webdriver
+
 driver = webdriver.PhantomJS()
 driver.get("http://www.esake.gr/el/action/EsakegameView?idgame=000F7010&mode=2")
-time.sleep(5)# you can give it some time to load the js
+time.sleep(5)  # you can give it some time to load the js
 html = driver.page_source
-soup = BeautifulSoup(html, 'html.parser')
+soup = BeautifulSoup(html, "html.parser")
 test = soup.findAll(text=True)
 test = [el.strip().replace("\n", "") for el in test]
 test = [el for el in test if el]
-test_text = ' '.join(list(test))
+test_text = " ".join(list(test))
 
 # Get a list with the teams playing. Test with a few other matches to
 # see if it applies more generally
@@ -60,10 +61,8 @@ first_rank_element_index = all_players_list.index(rank_elements[0])
 second_rank_element_index = all_players_list.index(rank_elements[0], first_rank_element_index + 1)
 
 # The following returns the players' names including spaces in the string, mixed with their stats
-players_team_0 = \
-    all_players_list[first_rank_element_index + 1: second_rank_element_index]
-players_team_1 = \
-    all_players_list[second_rank_element_index + 1:]
+players_team_0 = all_players_list[first_rank_element_index + 1 : second_rank_element_index]
+players_team_1 = all_players_list[second_rank_element_index + 1 :]
 
 # For the last_player_index, one could argue that we could use 12,
 # but this wouldn't necessarily apply to seasons like 2020-2021, where

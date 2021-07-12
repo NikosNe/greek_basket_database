@@ -1,0 +1,17 @@
+beautifulsoup4==4.6.3
+black==21.6b0
+certifi==2018.11.29
+isort==4.3.4
+jupyter==1.0.0
+keyring==16.0.0
+matplotlib==3.0.1
+mypy==0.670
+numpy==1.19.0
+pandas==1.1.0
+pytest==3.10.0
+pytz==2018.7
+requests==2.25.1
+tqdm==4.28.1
+traitlets==4.3.2
+typing==3.6.4
+
