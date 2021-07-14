@@ -1,15 +1,14 @@
 """This script includes all functionality to read and parse players' data on
    a per game basis"""
 import re
-import time
-from typing import Optional
 
-import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
+
 import pandas as pd
-from esake_scraper.shared.common_paths import DATA_DIR, SRC_DIR
+from esake_scraper.shared.common_paths import DATA_DIR
 from esake_scraper.shared.logging import logging
+from esake_scraper.SoupParser import SoupParser
+
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -18,60 +17,6 @@ HEADERS = {
 }
 
 logger = logging.getLogger("ESAKE players logger")
-
-
-class SoupParser:
-    """
-    Parse the data of either a single game -if is_game_id is True- or a series (otherwise)
-    into a BeautifulSoup object.
-    """
-    def __init__(self, season: int, series: str, is_game_id: bool,
-                 game_id: Optional[str] = None):
-        """
-        Arguments:
-            season:     1 if it's the regular season, 2 if it's the play-offs
-            series:     A two character string signifying the series, e.g. 01, 02, 03, etc.
-            is_game_id: True if this is a game_id, False if it is an overview
-            game_id:    A game id
-        """
-        self.season = season
-        self.series = series
-        self.is_game_id = is_game_id
-        self.game_id = game_id
-        self.url_ = ""
-        self.soup_ = BeautifulSoup
-        self.get_url()
-        self.get_soup()
-
-        if self.is_game_id and self.game_id is None:
-            logger.error("No game id provided")
-
-    def get_url(self):
-        """
-        Get either a series or a game url, depending whether is_game_id is respectively False or True
-        """
-        if self.is_game_id:
-            self.url_ = f"http://www.esake.gr/el/action/EsakegameView?idgame={self.game_id}&mode=2"
-        else:
-            self.url_ = f"http://www.esake.gr/el/action/EsakeResults?idchampionship=0000000D&idteam=&idseason=0000000{self.season}&series={self.series}"
-
-    def get_soup(self):
-        """
-        Parse the html data from a url into a BeautifulSoup object.
-        """
-        if self.is_game_id:
-            options = webdriver.ChromeOptions()
-            options.add_argument('headless')
-            driver = webdriver.Chrome(SRC_DIR / 'chromedriver', options=options)
-            driver.get(self.url_)
-            time.sleep(5)
-            html = driver.page_source
-            self.soup_ = BeautifulSoup(html, "html.parser")
-            self.soup_ = self.soup_.findAll(text=True)
-        else:
-            request = requests.get(self.url_, headers=HEADERS, verify=False)
-            html = request.content
-            self.soup_ = BeautifulSoup(html, "html.parser")
 
 
 def get_game_id_list(game_view_soup: BeautifulSoup) -> list:
@@ -362,10 +307,11 @@ class PlayersData:
 
 if __name__ == "__main__":
     SERIES = "01"
-    series_sp = SoupParser(1, SERIES, False)
+    SEASON = "regular"
+    series_sp = SoupParser(SEASON, SERIES, False)
     series_soup = series_sp.soup_
     game_id_list = get_game_id_list(series_soup)
     for game_id in game_id_list[:1]:
-        game_sp = SoupParser(1, SERIES, True, game_id)
+        game_sp = SoupParser(SEASON, SERIES, True, game_id)
         game_soup = game_sp.soup_
         pld = PlayersData(game_soup, True)
