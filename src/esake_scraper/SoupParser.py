@@ -7,6 +7,8 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from esake_scraper.shared.common_paths import SRC_DIR
 from esake_scraper.shared.logging import logging
+import esake_scraper.utils as utils
+
 
 logger = logging.getLogger("Parsing using BeautifulSoup")
 
@@ -17,14 +19,6 @@ HEADERS = {
 }
 
 SEASON_MAP = {"regular": 1, "play_offs": 2}
-
-
-class GameIdError(Exception):
-    pass
-
-
-class SeasonError(Exception):
-    pass
 
 
 class SoupParser:
@@ -43,9 +37,9 @@ class SoupParser:
         """
 
         if is_game_id and game_id is None:
-            raise GameIdError("No game id provided")
+            raise utils.GameIdError("No game id provided")
         if season not in SEASON_MAP.keys():
-            raise SeasonError(f"Season must be one of {SEASON_MAP.keys()}")
+            raise utils.SeasonError(f"Season must be one of {SEASON_MAP.keys()}")
 
         self.season = SEASON_MAP[season]
         self.series = series

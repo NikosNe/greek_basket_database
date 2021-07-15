@@ -3,16 +3,17 @@
 from unittest import mock
 import pytest
 import esake_scraper.SoupParser as esp
+import esake_scraper.utils as utils
 
 
 @pytest.mark.parametrize("season", ["regular", "play_offs"])
 def test_SoupParser_raises_game_id_error(season):
-    with pytest.raises(esp.GameIdError):
+    with pytest.raises(utils.GameIdError):
         esp.SoupParser(season, "01", True)
 
 
 def test_SoupParser_raises_season_error():
-    with pytest.raises(esp.SeasonError):
+    with pytest.raises(utils.SeasonError):
         esp.SoupParser("wrong_season_name", "01", True, "wer")
 
 

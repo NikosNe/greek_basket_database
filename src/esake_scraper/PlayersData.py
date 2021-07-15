@@ -8,6 +8,7 @@ import pandas as pd
 from esake_scraper.shared.common_paths import DATA_DIR
 from esake_scraper.shared.logging import logging
 from esake_scraper.SoupParser import SoupParser
+import esake_scraper.utils as utils
 
 
 HEADERS = {
@@ -17,11 +18,6 @@ HEADERS = {
 }
 
 logger = logging.getLogger("ESAKE players logger")
-
-
-def get_game_id_list(game_view_soup: BeautifulSoup) -> list:
-    game_id_list = [el[7:] for el in list(set(re.findall("idgame=.{8}", str(game_view_soup))))]
-    return game_id_list
 
 
 class PlayersData:
@@ -34,7 +30,6 @@ class PlayersData:
         self.players_data_ = [[], []]
         self.players_data_df_ = pd.DataFrame()
         self.to_csv = to_csv
-
         self.get_game_view()
         self.get_teams()
         if self.teams_list_:
@@ -42,11 +37,10 @@ class PlayersData:
             self.get_data_per_player()
             self.get_players_data_df()
             if to_csv:
+                logger.info("Saving to csv")
                 self.save_to_csv()
-
-    def get_game_id_list(self):
-        game_view_soup = self.soup_dict["game_view"]
-        self.game_id_list_ = [el[7:] for el in list(set(re.findall("idgame=.{8}", str(game_view_soup))))]
+        else:
+            logger.warning("No data for provided game")
 
     def get_game_view(self):
         """
@@ -78,7 +72,7 @@ class PlayersData:
             list
         """
         self.teams_list_ = re.findall("(\w*|\w*\s\w*) SHOTS", self.game_view_text_)
-        self.teams_list_ = [team.strip() for team in self.teams_list_]
+        self.teams_list_ = [team.strip().replace("0 ", "") for team in self.teams_list_]
 
     def get_players(self):
         """
@@ -310,8 +304,8 @@ if __name__ == "__main__":
     SEASON = "regular"
     series_sp = SoupParser(SEASON, SERIES, False)
     series_soup = series_sp.soup_
-    game_id_list = get_game_id_list(series_soup)
-    for game_id in game_id_list[:1]:
+    game_id_list = utils.get_game_id_list(series_soup)
+    for game_id in game_id_list:
         game_sp = SoupParser(SEASON, SERIES, True, game_id)
         game_soup = game_sp.soup_
         pld = PlayersData(game_soup, True)

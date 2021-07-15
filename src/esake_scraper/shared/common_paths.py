@@ -4,3 +4,5 @@ import pathlib
 SRC_DIR = pathlib.Path(__file__).parent.parent
 
 DATA_DIR = SRC_DIR.parent /"esake_scraper" / "data"
+
+TESTS_DATA_DIR = SRC_DIR.parent.parent /"tests" / "data"
