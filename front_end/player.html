@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Basket Overview</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="player.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+	<div class="container"> 
+
+		<div class= "row">
+			<div class="span1" id="esake-img">
+				<img src="esake_logo.jpg" alt="ESAKE">
+			</div>
+			<header class="span11" id="main-heading">
+				  <h1 >Basket App</h1>
+				  <h2>Player Overview</h2>
+			</header>
+		</div>
+
+		<div class="row">
+			
+			<div class="span1" id="sidebar">
+				<nav>
+					<h3>Menu</h3>
+			        <ul class="list-unstyled components">
+			        	<li>
+				        	<div id="view-buttons">
+				        		<h3>View</h3>
+				        		<input type="radio" name="view-picker" value="Player">
+								<label for="player">Player</label><br>
+								<input type="radio" name="view-picker" value="Team">
+								<label for="team">Team</label><br>
+				        	</div>
+			        	</li>
+			            <li>
+			            	<div class="input-group">
+							  <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search"
+							    aria-describedby="search-addon" id="search-bar"/>
+							  <button type="button" class="btn btn-outline-primary" id="search-btn">search</button>
+							</div>
+			            </li>
+			        </ul>	
+				</nav>
+			</div>
+
+			<div class="span2" id="player-img">
+				<img src="nick_galis_resized.jpg" alt="player-img">
+			</div>
+
+			<div class="span9" id="highlights-video">
+				<iframe  src="https://www.youtube.com/embed/UVmliUhoHf0">
+				</iframe>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="span1 score-table">
+				<table>
+				  <tr>
+				    <th>Scoring related stats</th>
+				  </tr>
+				  <tr>
+				    <td class="category">Avg points</td>
+				    <td>32.5</td>
+				  </tr>
+				  <tr>
+				    <td class="category">Avg points free throws</td>
+				    <td>8.5</td>
+				  </tr>
+				  <tr>
+				    <td class="category">Avg points 2-point shots</td>
+				    <td>12</td>
+				  </tr>
+				  <tr>
+				    <td class="category">Avg points 3-point shots</td>
+				    <td>12</td>
+				  </tr>
+				  <tr>
+				    <td class="category">Free throws pct</td>
+				    <td>98</td>
+				  </tr>
+				  <tr>
+				    <td class="category">2-point shots pct</td>
+				    <td>78</td>
+				  </tr>
+				  <tr>
+				    <td class="category">3-point shots pct</td>
+				    <td>52</td>
+				  </tr>
+				</table>
+			</div>
+			<div class="span11 plot">
+				<img src="score_stats_plot.png">	
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="span1 non-score-table">
+				<table>
+				  <tr>
+				    <th>Non-scoring related stats</th>
+				  </tr>
+				  <tr>
+				    <td class="category">Avg blocks</td>
+				    <td class="value">0.1</td>
+				  </tr>
+				  <tr>
+				    <td class="category">Avg rebounds</td>
+				    <td class="value">1</td>
+				  </tr>
+				  <tr>
+				    <td class="category">Avg fouls done</td>
+				    <td class="value">3</td>
+				  </tr>
+				  <tr>
+				    <td class="category">Avg fouls received</td>
+				    <td class="value">6</td>
+				  </tr>
+				  <tr>
+				    <td class="category">Avg turnovers</td>
+				    <td class="value">1</td>
+				  </tr>
+				  <tr>
+				    <td class="category">Avg assists</td>
+				    <td class="value">2</td>
+				  </tr>
+				  <tr>
+				    <td class="category">Avg duration</td>
+				    <td class="value">16.5</td>
+				  </tr>
+				</table>
+			</div>
+			<div class="span11 plot">
+				<img src="score_stats_plot.png">	
+			</div>
+		</div>
+	</div> 
+
+</body>
+</html>

@@ -1,0 +1,136 @@
+
+@media only screen and (max-width: 700px) {
+  #main-heading {
+    display: none;
+  }
+}
+
+body {
+	color: #eaece7;
+}
+.span1 {
+	padding-right: 0px;
+}
+
+.container {
+	margin: 50px 20px 0px 200px;
+	width: 60%;
+	padding: 0px;
+	background-color: #0c0533;
+}
+
+.form-outline {
+	width: 122px;
+}
+
+#sidebar {
+	width: 209px;
+	border-style: solid;
+	padding-left: 10px;
+}
+
+nav#sidebar > h3 {
+	margin:10px 0px 10px 0px;
+}
+
+ul > * {
+	margin:10px 0px 10px 0px;
+}
+
+#search-bar {
+	width: 60%;
+}
+
+#search-btn {
+	width: 50px;
+	height: 34px;
+	font-size: 10px;
+}
+
+
+#main-heading {
+	width: 100%;
+	margin-left: 30px;
+}
+
+.row {
+	display: flex;
+	width: 100%;
+}
+
+h1 {
+	text-align: center;
+}
+
+h2 {
+	text-align: center;
+	margin-top: 10px;
+}
+
+.row {
+	margin: 0px;
+}
+
+#player-img {
+	margin-left: 30px;
+	margin-right: 17px;
+}
+
+iframe {
+	width:137%;
+	height:100%;
+}
+
+@media only screen and (max-width: 1300px) {
+  iframe {
+    width: 100%;
+  }
+}
+
+
+td {
+	padding-right: 9px;
+	padding-bottom: 5px;
+	border-style: solid;
+}
+
+tr {
+	border-style: solid;
+	padding-bottom: 5px;
+}
+
+.plot {
+	margin-left: 30px;
+	border-style: solid;
+	margin-right: 0px;
+}
+
+.score-table  td.category {
+	padding-right: 10px;
+}
+
+.non-score-table td {
+	padding-right: 1px;
+}
+
+.category {
+	text-align: left;
+}
+
+.non-score-table td.category {
+	padding-right: 0px;
+}
+
+.non-score-table .value {
+	margin-left: 50px;
+	padding-right: 4px;
+	text-align: left;
+}
+
+.plot {
+	margin-top: 24px;
+}
+
+#search-btn {
+	color: black;
+}
