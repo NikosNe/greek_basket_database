@@ -26,12 +26,12 @@ class SoupParser:
     Parse the data of either a single game -if is_game_id is True- or a series (otherwise)
     into a BeautifulSoup object.
     """
-    def __init__(self, season: str, series: str, is_game_id: bool,
+    def __init__(self, season: str, series: int, is_game_id: bool,
                  game_id: Optional[str] = None):
         """
         Arguments:
             season:     Either "regular" or "play_offs"
-            series:     A two character string signifying the series, e.g. 01, 02, 03, etc.
+            series:     A single-digit integer signifying which series data we are scraping
             is_game_id: True if this is a game_id, False if it is an overview
             game_id:    A game id
         """

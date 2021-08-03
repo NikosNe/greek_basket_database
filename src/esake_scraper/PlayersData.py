@@ -4,6 +4,7 @@ import re
 
 from bs4 import BeautifulSoup
 
+import numpy as np
 import pandas as pd
 from esake_scraper.shared.common_paths import DATA_DIR
 from esake_scraper.shared.logging import logging
@@ -21,7 +22,8 @@ logger = logging.getLogger("ESAKE players logger")
 
 
 class PlayersData:
-    def __init__(self, game_id_soup: BeautifulSoup, to_csv: bool):
+    def __init__(self, game_id: str, game_id_soup: BeautifulSoup, to_csv: bool):
+        self.game_id = game_id
         self.game_id_soup = game_id_soup
         self.game_id_list_ = []
         self.game_view_text_ = ""
@@ -224,9 +226,11 @@ class PlayersData:
         self.players_data_df_["points"] = self.players_data_df_["all_stats"].apply(lambda x: self._get_points(x))
         self.players_data_df_["all_shots"] = self.players_data_df_["all_stats"].apply(lambda x: self._get_all_shots(x))
 
+        # In some cases, more than 3 entries are recorded under all_shots. Probably an error
+        # from the website side
         self.players_data_df_[["two_point", "three_point", "free_throws"]] = pd.DataFrame(
             self.players_data_df_["all_shots"].to_list()
-        )
+        )[[0, 1, 2]]
 
         for col_name, series in self.players_data_df_[["two_point", "three_point", "free_throws"]].iteritems():
             self.players_data_df_[[f"{col_name}_achieved", f"{col_name}_attempted"]] = self._split_into_achieved_and_attempted(
@@ -247,9 +251,18 @@ class PlayersData:
         self.players_data_df_ = self.players_data_df_.drop(
             ["all_stats", "all_shots", "two_point", "three_point", "free_throws"], axis=1
         )
-
+        # Some elements are empty strings. They are set to nan, so that we can do the float conversion
+        self._set_empty_to_nan()
         self.players_data_df_[self.players_data_df_.columns.drop(["team", "player_name"])] = \
-            self.players_data_df_[self.players_data_df_.columns.drop(["team", "player_name"])].astype(int)
+            self.players_data_df_[self.players_data_df_.columns.drop(["team", "player_name"])].astype(float)
+
+        self.players_data_df_["game_id"] = self.game_id
+
+    def _set_empty_to_nan(self):
+        element = self.players_data_df_.where(self.players_data_df_ == "").dropna(how="all").dropna(axis=1)
+        index = element.index
+        columns = element.columns
+        self.players_data_df_.loc[index, columns] = np.nan
 
     @staticmethod
     def _get_duration(player_data: str) -> int:
@@ -300,12 +313,19 @@ class PlayersData:
 
 
 if __name__ == "__main__":
-    SERIES = "01"
-    SEASON = "regular"
-    series_sp = SoupParser(SEASON, SERIES, False)
-    series_soup = series_sp.soup_
-    game_id_list = utils.get_game_id_list(series_soup)
-    for game_id in game_id_list:
-        game_sp = SoupParser(SEASON, SERIES, True, game_id)
-        game_soup = game_sp.soup_
-        pld = PlayersData(game_soup, True)
+    for series in range(8, 27):
+        print(series)
+        # series = 8
+        SERIES = series
+        SEASON = "regular"
+        series_sp = SoupParser(SEASON, SERIES, False)
+        series_soup = series_sp.soup_
+        game_id_list = utils.get_game_id_list(series_soup)
+        for game_id in game_id_list:
+            print(game_id)
+            # There were too many errors for this game_id and it was decided
+            # to skip it
+            if game_id != "0010811B":
+                game_sp = SoupParser(SEASON, SERIES, True, game_id)
+                game_soup = game_sp.soup_
+                pld = PlayersData(game_id, game_soup, True)

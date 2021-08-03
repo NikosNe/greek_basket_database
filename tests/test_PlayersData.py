@@ -14,8 +14,8 @@ with open(TESTS_DATA_DIR / "dummy_soup.pickle", "rb") as f:
     DUMMY_GAME_ID_SOUP = pickle.load(f)
 
 
-def test_PlayersData():
-    pld = PlayersData(DUMMY_GAME_ID_SOUP, False)
+def test_players_data():
+    pld = PlayersData("00F123", DUMMY_GAME_ID_SOUP, False)
     assert isinstance(pld.game_id_soup, bs4.element.ResultSet)
     assert isinstance(pld.game_view_text_, str)
     assert isinstance(pld.teams_list_, list)
@@ -34,7 +34,7 @@ def test_PlayersData():
                                             "steals", "fouls_committed",
                                             "fouls_received", "blocks",
                                             "assists", "offensive_rebounds",
-                                            "defensive_rebounds"])
+                                            "defensive_rebounds", "game_id"])
     all(ptypes.is_object_dtype(pld.players_data_df_[col]) for col in ["team", "player_name"])
     all(ptypes.is_numeric_dtype(pld.players_data_df_[col]) for col in ["duration",
                                                                        "points", "two_point_achieved",
