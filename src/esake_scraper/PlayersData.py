@@ -37,6 +37,7 @@ class PlayersData:
         if self.teams_list_:
             self.get_players()
             self.get_data_per_player()
+            self._get_game_date()
             self.get_players_data_df()
             if to_csv:
                 logger.info("Saving to csv")
@@ -61,7 +62,18 @@ class PlayersData:
         # Remove empty strings from the list
         game_view_list = [game_view for game_view in game_view_list if game_view]
         self.game_view_text_ = " ".join(list(game_view_list))
-    
+
+    def _get_game_date(self):
+        """
+        Get the date of the game. It makes sense to capture the date of the game instead of the series, as games can
+        be postponed
+        """
+        greek_date = re.findall(r"[0-9]+ \w* [0-9]{4}", self.game_view_text_)[0].split()
+        months_map = {"Ιανουαρίου": 1, "Φεβρουαρίου": 2, "Μαρτίου": 3, "Απριλίου": 4, "Μαϊου": 5, "Ιουνίου": 6,
+                      "Ιουλίου": 7, "Αυγούστου": 8, "Σεπτεμβρίου": 9, "Οκτωβρίου": 10, "Νοεμβρίου": 11, "Δεκεμβρίου": 12}
+        month = months_map[greek_date[1]]
+        self.game_date_ = pd.Timestamp(int(greek_date[2]), month, int(greek_date[0]))
+
     def get_teams(self):
         """
         Read a string with the html content corresponding to a single game and
@@ -257,7 +269,7 @@ class PlayersData:
             self.players_data_df_[self.players_data_df_.columns.drop(["team", "player_name"])].astype(float)
 
         self.players_data_df_["game_id"] = self.game_id
-
+        self.players_data_df_["game_date"] = self.game_date_
     def _set_empty_to_nan(self):
         element = self.players_data_df_.where(self.players_data_df_ == "").dropna(how="all").dropna(axis=1)
         index = element.index
@@ -313,7 +325,7 @@ class PlayersData:
 
 
 if __name__ == "__main__":
-    for series in range(8, 27):
+    for series in range(1, 27):
         print(series)
         # series = 8
         SERIES = series
