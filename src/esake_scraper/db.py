@@ -28,7 +28,8 @@ def get_players_table(games_data: pd.DataFrame) -> pd.DataFrame:
     Returns:
         pd.DataFrame
     """
-    player_name_series = games_data["player_name"].unique()[:-1]
+    player_name_series = games_data["player_name"].unique()
+    player_name_series = player_name_series[:len(player_name_series)]
     players_data = pd.DataFrame(data=player_name_series)
     players_data = players_data.reset_index()
     players_data.columns = ["id", "player_name"]
@@ -47,11 +48,11 @@ def _capitalize_name(player_name: str) -> str:
     Returns:
         The player's name capitalized
     """
-    # Remove accents
-    player_name = player_name.replace("ά", "α").replace("έ", "ε").replace("ί", "ι").replace("ή", "η").replace("ύ", "υ").replace("ό", "ο").replace("ώ", "ω")
+    # Remove accents and replace final sigmas with normal ones
+    player_name = player_name.translate(str.maketrans({"ά": "α", "Ά": "α", "έ": "ε", "Έ": "ε", "ί": "ι", "Ί": "ι",
+                                                       "ή": "η", "Ή": "η", "ύ": "υ", "Ύ": "υ", "ό": "ο", "Ό": "o",
+                                                       "ώ": "ω", "Ώ": "ω", "ς": "σ"}))
 
-    # Replace final sigmas
-    player_name = player_name.replace("ς", "σ")
     player_name = player_name.upper()
     return player_name
 
@@ -75,12 +76,13 @@ def get_teams_table(games_data: pd.DataFrame) -> pd.DataFrame:
 
 def _get_averages(games_data: pd.DataFrame) -> pd.DataFrame:
     """
+    Read a dataframe with data from many games and calculate the average statistics we need.
 
     Arguments:
-        games_data:
+        games_data: A dataframe with data from many games
 
     Returns:
-
+        pd.DataFrame
     """
     stats_data = games_data[["player_name", "points", "free_throws_attempted", "two_point_attempted",
                              "three_point_attempted", "blocks", "fouls_committed", "offensive_rebounds",
@@ -95,13 +97,15 @@ def _get_averages(games_data: pd.DataFrame) -> pd.DataFrame:
 
 def _get_percentages(games_data: pd.DataFrame, stats_data: pd.DataFrame) -> pd.DataFrame:
     """
+    Read a dataframe with data from many games and a dataframe with statistics and
+    calculate the relevant percentages
 
     Arguments:
-        games_data:
-        stats_data:
+        games_data: A dataframe with data from many games
+        stats_data: A dataframe with statistics
 
     Returns:
-
+        pd.DataFrame
     """
     stats_data[["total_free_throws_achieved", "total_free_throws_attempted",
                 "total_two_point_achieved", "total_two_point_attempted",
@@ -117,7 +121,15 @@ def _get_percentages(games_data: pd.DataFrame, stats_data: pd.DataFrame) -> pd.D
 
 
 def get_stats_table(games_data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Read a dataframe with data from many games and calculate the various useful statistics to be displayed
 
+    Arguments:
+        games_data: A dataframe with data from many games
+
+    Returns:
+        pd.DataFrame
+    """
     stats_data = _get_averages(games_data)
     stats_data = _get_percentages(games_data, stats_data)
     stats_data = stats_data.rename(columns={"points": "avg_points", "blocks": "avg_blocks",
