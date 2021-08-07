@@ -1,5 +1,3 @@
-
-
 from unittest import mock
 import pytest
 import esake_scraper.SoupParser as esp
@@ -17,10 +15,15 @@ def test_soup_parser_raises_season_error():
         esp.SoupParser("wrong_season_name", "01", True, "wer")
 
 
-@pytest.mark.parametrize("season, is_game_id, game_id", [("regular", True, "wer"),
-                                                         ("regular", False, None),
-                                                         ("play_offs", True, "wer"),
-                                                         ("play_offs", False, None)])
+@pytest.mark.parametrize(
+    "season, is_game_id, game_id",
+    [
+        ("regular", True, "wer"),
+        ("regular", False, None),
+        ("play_offs", True, "wer"),
+        ("play_offs", False, None),
+    ],
+)
 def test_soup_parser(season, is_game_id, game_id):
     with mock.patch("selenium.webdriver.ChromeOptions") as mock_options:
         with mock.patch("selenium.webdriver.Chrome") as mock_chrome:

@@ -1,5 +1,3 @@
-
-
 from unittest import mock
 import pickle
 
@@ -26,22 +24,50 @@ def test_players_data():
     assert len(pld.players_data_) == 2
     assert isinstance(pld.players_data_df_, pd.DataFrame)
     assert len(pld.players_data_df_) == len(pld.players_list_[0]) + len(pld.players_list_[1])
-    assert all(pld.players_data_df_.columns == ["team", "player_name", "duration",
-                                            "points", "two_point_achieved",
-                                            "two_point_attempted", "three_point_achieved",
-                                            "three_point_attempted", "free_throws_achieved",
-                                            "free_throws_attempted", "turnovers",
-                                            "steals", "fouls_committed",
-                                            "fouls_received", "blocks",
-                                            "assists", "offensive_rebounds",
-                                            "defensive_rebounds", "game_id"])
+    assert all(
+        pld.players_data_df_.columns
+        == [
+            "team",
+            "player_name",
+            "duration",
+            "points",
+            "two_point_achieved",
+            "two_point_attempted",
+            "three_point_achieved",
+            "three_point_attempted",
+            "free_throws_achieved",
+            "free_throws_attempted",
+            "turnovers",
+            "steals",
+            "fouls_committed",
+            "fouls_received",
+            "blocks",
+            "assists",
+            "offensive_rebounds",
+            "defensive_rebounds",
+            "game_id",
+            "game_date"
+        ]
+    )
     all(ptypes.is_object_dtype(pld.players_data_df_[col]) for col in ["team", "player_name"])
-    all(ptypes.is_numeric_dtype(pld.players_data_df_[col]) for col in ["duration",
-                                                                       "points", "two_point_achieved",
-                                                                       "two_point_attempted", "three_point_achieved",
-                                                                       "three_point_attempted", "free_throws_achieved",
-                                                                       "free_throws_attempted", "turnovers",
-                                                                       "steals", "fouls_committed",
-                                                                       "fouls_received", "blocks",
-                                                                       "assists", "offensive_rebounds",
-                                                                       "defensive_rebounds"])
+    all(
+        ptypes.is_numeric_dtype(pld.players_data_df_[col])
+        for col in [
+            "duration",
+            "points",
+            "two_point_achieved",
+            "two_point_attempted",
+            "three_point_achieved",
+            "three_point_attempted",
+            "free_throws_achieved",
+            "free_throws_attempted",
+            "turnovers",
+            "steals",
+            "fouls_committed",
+            "fouls_received",
+            "blocks",
+            "assists",
+            "offensive_rebounds",
+            "defensive_rebounds",
+        ]
+    )
