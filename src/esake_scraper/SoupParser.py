@@ -1,4 +1,3 @@
-
 import time
 from typing import Optional
 
@@ -14,7 +13,7 @@ logger = logging.getLogger("Parsing using BeautifulSoup")
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) "
-                  "Chrome/46.0.2490.80 Safari/537.36",
+    "Chrome/46.0.2490.80 Safari/537.36",
     "Content-Type": "text/html",
 }
 
@@ -26,12 +25,12 @@ class SoupParser:
     Parse the data of either a single game -if is_game_id is True- or a series (otherwise)
     into a BeautifulSoup object.
     """
-    def __init__(self, season: str, series: str, is_game_id: bool,
-                 game_id: Optional[str] = None):
+
+    def __init__(self, season: str, series: int, is_game_id: bool, game_id: Optional[str] = None):
         """
         Arguments:
             season:     Either "regular" or "play_offs"
-            series:     A two character string signifying the series, e.g. 01, 02, 03, etc.
+            series:     A single-digit integer signifying which series data we are scraping
             is_game_id: True if this is a game_id, False if it is an overview
             game_id:    A game id
         """
@@ -65,8 +64,8 @@ class SoupParser:
         """
         if self.is_game_id:
             options = webdriver.ChromeOptions()
-            options.add_argument('headless')
-            driver = webdriver.Chrome(SRC_DIR / 'chromedriver', options=options)
+            options.add_argument("headless")
+            driver = webdriver.Chrome(SRC_DIR / "chromedriver", options=options)
             driver.get(self.url_)
             time.sleep(5)
             html = driver.page_source

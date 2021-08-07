@@ -4,6 +4,7 @@ import re
 
 from bs4 import BeautifulSoup
 
+import numpy as np
 import pandas as pd
 from esake_scraper.shared.common_paths import DATA_DIR
 from esake_scraper.shared.logging import logging
@@ -21,7 +22,8 @@ logger = logging.getLogger("ESAKE players logger")
 
 
 class PlayersData:
-    def __init__(self, game_id_soup: BeautifulSoup, to_csv: bool):
+    def __init__(self, game_id: str, game_id_soup: BeautifulSoup, to_csv: bool):
+        self.game_id = game_id
         self.game_id_soup = game_id_soup
         self.game_id_list_ = []
         self.game_view_text_ = ""
@@ -35,6 +37,7 @@ class PlayersData:
         if self.teams_list_:
             self.get_players()
             self.get_data_per_player()
+            self._get_game_date()
             self.get_players_data_df()
             if to_csv:
                 logger.info("Saving to csv")
@@ -46,28 +49,51 @@ class PlayersData:
         """
         Read a BeautifulSoup object and get a text with the corresponding game view, i.e.
         the html content including all the html content for a certain game
-    
+
         Arguments:
             soup: A BeautifulSoup object with the html content of a specific game
-    
+
         Returns:
             str
         """
 
         game_view_list = [game_view.strip().replace("\n", "") for game_view in self.game_id_soup]
-    
+
         # Remove empty strings from the list
         game_view_list = [game_view for game_view in game_view_list if game_view]
         self.game_view_text_ = " ".join(list(game_view_list))
-    
+
+    def _get_game_date(self):
+        """
+        Get the date of the game. It makes sense to capture the date of the game instead of the series, as games can
+        be postponed
+        """
+        greek_date = re.findall(r"[0-9]+ \w* [0-9]{4}", self.game_view_text_)[0].split()
+        months_map = {
+            "Ιανουαρίου": 1,
+            "Φεβρουαρίου": 2,
+            "Μαρτίου": 3,
+            "Απριλίου": 4,
+            "Μαϊου": 5,
+            "Ιουνίου": 6,
+            "Ιουλίου": 7,
+            "Αυγούστου": 8,
+            "Σεπτεμβρίου": 9,
+            "Οκτωβρίου": 10,
+            "Νοεμβρίου": 11,
+            "Δεκεμβρίου": 12,
+        }
+        month = months_map[greek_date[1]]
+        self.game_date_ = pd.Timestamp(int(greek_date[2]), month, int(greek_date[0]))
+
     def get_teams(self):
         """
         Read a string with the html content corresponding to a single game and
         return a list with the names of the two teams playing
-    
+
         Arguments:
             game_view_text: A string with the html content of a game
-    
+
         Returns:
             list
         """
@@ -78,23 +104,23 @@ class PlayersData:
         """
         Read a string with the html content of a game and return a list of two lists,
         each of which contains the player names of each team.
-    
+
         Arguments:
             game_view_text: A string with the html content of a game
-    
+
         Returns:
             list
         """
         # The tricky part here is that some players also have a middle name and
         # therefore can't be matched by \w+\s\w+
         all_players_list = re.findall(r"[\[\w\s]+ [\w\s\-]+", self.game_view_text_)
-    
+
         # The players of the first team start after the first string with the substring RANK
         synolo_elements = [el for el in all_players_list if "ΣΥΝΟΛΟ" in el]
-    
+
         # Get the index of the first string including RANK
         first_synolo_element_index = all_players_list.index(synolo_elements[0])
-    
+
         # Get the index of the second string including RANK
         second_synolo_element_index = all_players_list.index(
             synolo_elements[1], first_synolo_element_index + 1
@@ -109,7 +135,7 @@ class PlayersData:
             (0, first_synolo_element_index),
             (first_synolo_element_index + 1, second_synolo_element_index),
         ]
-    
+
         # Get a list of 2 lists, each of which includes the players of one team
         # The following returns the players' names including spaces in the string,
         # mixed with their stats
@@ -127,7 +153,9 @@ class PlayersData:
             last_player_numbers = re.findall(r"[\d\s]+", self.players_list_[idx][-1])
             last_player_numbers = [number for number in last_player_numbers if number != " "]
             last_player_numbers = "-".join(last_player_numbers)
-            self.players_list_[idx][-1] = self.players_list_[idx][-1].replace(last_player_numbers, "")
+            self.players_list_[idx][-1] = self.players_list_[idx][-1].replace(
+                last_player_numbers, ""
+            )
 
     def get_data_per_player(self):
         """
@@ -135,13 +163,13 @@ class PlayersData:
         and create a list of lists with the team names followed by their data, i.e.
         how many shots of various types they attempted, how many were succesful,
         how many blocks, steals, turnovers, etc.
-    
+
         Arguments:
             players_list: A list of two lists, each of which has the player names of
                           each team
 
         """
-    
+
         for ls, stats_ls in zip(self.players_list_, self.players_data_):
             for players_tup in zip(ls[:-1], ls[1:]):
                 player_data = re.findall(
@@ -158,16 +186,16 @@ class PlayersData:
 
     def _get_last_players_data(self):
         """
-            Read a list of lists with the player names and another list of lists with the player
-            names and their data and get the data of the player of each team that is mentioned
-            last
-            Arguments:
-                players_list: A list of two lists with the names of each team's players
-                players_data: A list of two lists with the names and data of each team's
-                              players
-        
-            Returns:
-                list
+        Read a list of lists with the player names and another list of lists with the player
+        names and their data and get the data of the player of each team that is mentioned
+        last
+        Arguments:
+            players_list: A list of two lists with the names of each team's players
+            players_data: A list of two lists with the names and data of each team's
+                          players
+
+        Returns:
+            list
         """
         # Handle the last player for each team
         last_player_data = re.findall(
@@ -177,7 +205,8 @@ class PlayersData:
         last_player_data = re.findall(f"{self.players_list_[0][-1]}.*ΣΥΝΟΛΟ", last_player_data[0])
         self.players_data_[0].append(last_player_data[0])
         last_player_data = re.findall(
-            f"{self.players_list_[1][-1]} [0-9][0-9]:[0-9][0-9]:[0-9][0-9].*ΣΥΝΟΛΟ", self.game_view_text_
+            f"{self.players_list_[1][-1]} [0-9][0-9]:[0-9][0-9]:[0-9][0-9].*ΣΥΝΟΛΟ",
+            self.game_view_text_,
         )
         self.players_data_[1].append(last_player_data[0])
         for idx, player_stats in enumerate([self.players_data_[0][-1], self.players_data_[1][-1]]):
@@ -219,18 +248,31 @@ class PlayersData:
             team_stats_list.append(team_stats_df)
 
         self.players_data_df_ = pd.concat(team_stats_list, ignore_index=True)
-        self.players_data_df_["player_name"] = pd.Series([player for ls in self.players_list_ for player in ls])
-        self.players_data_df_["duration"] = self.players_data_df_["all_stats"].apply(lambda x: self._get_duration(x))
-        self.players_data_df_["points"] = self.players_data_df_["all_stats"].apply(lambda x: self._get_points(x))
-        self.players_data_df_["all_shots"] = self.players_data_df_["all_stats"].apply(lambda x: self._get_all_shots(x))
-
-        self.players_data_df_[["two_point", "three_point", "free_throws"]] = pd.DataFrame(
-            self.players_data_df_["all_shots"].to_list()
+        self.players_data_df_["player_name"] = pd.Series(
+            [player for ls in self.players_list_ for player in ls]
+        )
+        self.players_data_df_["duration"] = self.players_data_df_["all_stats"].apply(
+            lambda x: self._get_duration(x)
+        )
+        self.players_data_df_["points"] = self.players_data_df_["all_stats"].apply(
+            lambda x: self._get_points(x)
+        )
+        self.players_data_df_["all_shots"] = self.players_data_df_["all_stats"].apply(
+            lambda x: self._get_all_shots(x)
         )
 
-        for col_name, series in self.players_data_df_[["two_point", "three_point", "free_throws"]].iteritems():
-            self.players_data_df_[[f"{col_name}_achieved", f"{col_name}_attempted"]] = self._split_into_achieved_and_attempted(
-                self.players_data_df_[col_name])
+        # In some cases, more than 3 entries are recorded under all_shots. Probably an error
+        # from the website side
+        self.players_data_df_[["two_point", "three_point", "free_throws"]] = pd.DataFrame(
+            self.players_data_df_["all_shots"].to_list()
+        )[[0, 1, 2]]
+
+        for col_name, series in self.players_data_df_[
+            ["two_point", "three_point", "free_throws"]
+        ].iteritems():
+            self.players_data_df_[
+                [f"{col_name}_achieved", f"{col_name}_attempted"]
+            ] = self._split_into_achieved_and_attempted(self.players_data_df_[col_name])
         self.players_data_df_[
             [
                 "turnovers",
@@ -242,14 +284,35 @@ class PlayersData:
                 "offensive_rebounds",
                 "defensive_rebounds",
             ]
-        ] = pd.DataFrame(self.players_data_df_["all_stats"].apply(lambda x: x[-15:].split(" ")).to_list())
+        ] = pd.DataFrame(
+            self.players_data_df_["all_stats"].apply(lambda x: x[-15:].split(" ")).to_list()
+        )
 
         self.players_data_df_ = self.players_data_df_.drop(
             ["all_stats", "all_shots", "two_point", "three_point", "free_throws"], axis=1
         )
+        # Some elements are empty strings. They are set to nan, so that we can do the float conversion
+        self._set_empty_to_nan()
+        self.players_data_df_[
+            self.players_data_df_.columns.drop(["team", "player_name"])
+        ] = self.players_data_df_[
+            self.players_data_df_.columns.drop(["team", "player_name"])
+        ].astype(
+            float
+        )
 
-        self.players_data_df_[self.players_data_df_.columns.drop(["team", "player_name"])] = \
-            self.players_data_df_[self.players_data_df_.columns.drop(["team", "player_name"])].astype(int)
+        self.players_data_df_["game_id"] = self.game_id
+        self.players_data_df_["game_date"] = self.game_date_
+
+    def _set_empty_to_nan(self):
+        element = (
+            self.players_data_df_.where(self.players_data_df_ == "")
+            .dropna(how="all")
+            .dropna(axis=1)
+        )
+        index = element.index
+        columns = element.columns
+        self.players_data_df_.loc[index, columns] = np.nan
 
     @staticmethod
     def _get_duration(player_data: str) -> int:
@@ -300,12 +363,19 @@ class PlayersData:
 
 
 if __name__ == "__main__":
-    SERIES = "01"
-    SEASON = "regular"
-    series_sp = SoupParser(SEASON, SERIES, False)
-    series_soup = series_sp.soup_
-    game_id_list = utils.get_game_id_list(series_soup)
-    for game_id in game_id_list:
-        game_sp = SoupParser(SEASON, SERIES, True, game_id)
-        game_soup = game_sp.soup_
-        pld = PlayersData(game_soup, True)
+    for series in range(1, 27):
+        print(series)
+        # series = 8
+        SERIES = series
+        SEASON = "regular"
+        series_sp = SoupParser(SEASON, SERIES, False)
+        series_soup = series_sp.soup_
+        game_id_list = utils.get_game_id_list(series_soup)
+        for game_id in game_id_list:
+            print(game_id)
+            # There were too many errors for this game_id and it was decided
+            # to skip it
+            if game_id != "0010811B":
+                game_sp = SoupParser(SEASON, SERIES, True, game_id)
+                game_soup = game_sp.soup_
+                pld = PlayersData(game_id, game_soup, True)
